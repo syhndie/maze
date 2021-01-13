@@ -4,7 +4,7 @@ const {
     Runner,
     World,
     Bodies } = Matter;
-
+const cells = 6;
 const width = 600;
 const height = 600;
 
@@ -32,15 +32,15 @@ const walls = [
 World.add(world, walls);
 
 //maze generation
-const grid = Array(3)
+const grid = Array(cells)
     .fill(null)
-    .map(() => Array(3).fill(false));
-const verticals = Array(3)
+    .map(() => Array(cells).fill(false));
+const verticals = Array(cells)
     .fill(null)
-    .map(() => Array(2).fill(false));
-const horizontals = Array(2)
+    .map(() => Array(cells - 1).fill(false));
+const horizontals = Array(cells - 1)
     .fill(null)
-    .map(() => Array(3).fill(false));
-
+    .map(() => Array(cells).fill(false));
+console.log(grid);
 console.log(verticals);
 console.log(horizontals);
