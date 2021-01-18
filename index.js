@@ -1,18 +1,18 @@
+const cells = 24;
+const width = 600;
+const height = 600;
+const wallThickness = 10;
+//length of one side of one cell
+const unitLength = width / cells;
+
+//destructure necessary parameters from Matter.js
 const {
     Engine,
     Render,
     Runner,
     World,
     Bodies } = Matter;
-
-const cells = 10;
-const width = 600;
-const height = 600;
-const wallThickness = 6;
-
-//length of one side of one cell
-const unitLength = width / cells;
-
+//create instances of Engine, World, and Render
 const engine = Engine.create();
 const { world } = engine;
 const render = Render.create({
@@ -24,10 +24,11 @@ const render = Render.create({
         wireframes: false,
     }
 });
+//render the world
 Render.run(render);
 Runner.run(Runner.create(), engine);
 
-//Walls
+//create outside boundary walls
 const walls = [
     Bodies.rectangle(width / 2, 0, width, wallThickness, { isStatic: true }),
     Bodies.rectangle(width / 2, height, width, wallThickness, { isStatic: true }),
@@ -36,7 +37,11 @@ const walls = [
 ];
 World.add(world, walls);
 
+
 //maze generation
+
+//function to randomize neighbors of current cell when stepping 
+//through the maze creation process
 const shuffle = (arr) => {
     let counter = arr.length;
     while (counter > 0) {
@@ -49,12 +54,21 @@ const shuffle = (arr) => {
     }
     return arr;
 };
+//array that reprsents the cells of the maze
 const grid = Array(cells)
     .fill(null)
     .map(() => Array(cells).fill(false));
+//array of vertical walls
+//each array in verticals is a row of  vertical walls
+//each element in that array is an actual wall
+//true means 'is open'
 const verticals = Array(cells)
     .fill(null)
     .map(() => Array(cells - 1).fill(false));
+//array of horizontal walls
+//each array in horizontals is a row of horizontal walls
+//each element in the array is an actual wall
+//true means 'is open'
 const horizontals = Array(cells - 1)
     .fill(null)
     .map(() => Array(cells).fill(false));
@@ -69,6 +83,7 @@ const stepThroughCell = (row, column) => {
     }
 
     //mark cell as being visited (true)
+    //eventually all cells will be true
     grid[row][column] = true;
 
     //assemble randomly-ordered list of neighbors
@@ -90,7 +105,7 @@ const stepThroughCell = (row, column) => {
         if (grid[nextRow][nextColumn]) {
             continue;
         }
-        //remove wall that is being croseed (change to true in horizontal or vertical array)
+        //remove wall that is being croseed (change to true (is open) in horizontal or vertical array)
         if (direction === 'left') {
             verticals[row][column - 1] = true;
         } else if (direction === 'right') {
@@ -106,14 +121,19 @@ const stepThroughCell = (row, column) => {
 };
 stepThroughCell(startRow, startColumn);
 
+//create inner maze walls
 horizontals.forEach((row, rowIndex) => {
-    row.forEach((open, columnIndex) => {
-        if (open) {
+    row.forEach((isOpen, columnIndex) => {
+        //if passage is open, skip that wall
+        if (isOpen) {
             return;
         }
         const wall = Bodies.rectangle(
+            //find the x coordinate of the center of the horizonal wall
             columnIndex * unitLength + unitLength / 2,
+            //find the y coordinate of the center of the horizontal wall
             rowIndex * unitLength + unitLength,
+            //the width of the horizontal wall
             unitLength,
             wallThickness,
             {
@@ -124,14 +144,18 @@ horizontals.forEach((row, rowIndex) => {
     });
 });
 verticals.forEach((row, rowIndex) => {
-    row.forEach((open, columnIndex) => {
-        if (open) {
+    row.forEach((isOpen, columnIndex) => {
+        //if passage is open, skip that wall
+        if (isOpen) {
             return;
         }
         const wall = Bodies.rectangle(
+            //find the x coordinate of the center of the vertical wall
             columnIndex * unitLength + unitLength,
+            //find the y coordinate of the center of the vertical wall
             rowIndex * unitLength + unitLength / 2,
             wallThickness,
+            //the heigth of the vertical wall
             unitLength,
             {
                 isStatic: true
