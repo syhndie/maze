@@ -1,7 +1,7 @@
 const cells = 24;
 const width = 600;
 const height = 600;
-const wallThickness = 10;
+const wallThickness = 5;
 //length of one side of one cell
 const unitLength = width / cells;
 
@@ -164,3 +164,16 @@ verticals.forEach((row, rowIndex) => {
         World.add(world, wall);
     });
 });
+
+const goal = Bodies.rectangle(
+    //x coordinate of center of lower right square in the grid
+    width - unitLength / 2,
+    height - unitLength / 2,
+    unitLength * 0.7,
+    unitLength * 0.7,
+    {
+        isStatic: true,
+        render: { fillStyle: 'green' }
+    }
+);
+World.add(world, goal);
