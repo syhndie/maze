@@ -1,9 +1,14 @@
-const cells = 3;
-const width = 600;
-const height = 600;
+const cells = 16;
+const width = 700;
+const height = 700;
 const wallThickness = 5;
 //length of one side of one cell
 const unitLength = width / cells;
+const upKey = 'ArrowUp';
+const downKey = 'ArrowDown';
+const leftKey = 'ArrowLeft';
+const rightKey = 'ArrowRight';
+const velocityBump = 2;
 
 //destructure necessary parameters from Matter.js
 const {
@@ -11,9 +16,11 @@ const {
     Render,
     Runner,
     World,
-    Bodies } = Matter;
+    Bodies,
+    Body } = Matter;
 //create instances of Engine, World, and Render
 const engine = Engine.create();
+engine.world.gravity.y = 0;
 const { world } = engine;
 const render = Render.create({
     element: document.body,
@@ -190,8 +197,24 @@ const ball = Bodies.circle(
     //make the ball half the size of a cell - radius half that 
     unitLength / 4,
     {
-        isStatic: true,
+
         render: { fillStyle: 'red' }
     }
 );
 World.add(world, ball);
+
+document.addEventListener('keydown', event => {
+    const { x, y } = ball.velocity;
+    if (event.key === rightKey) {
+        Body.setVelocity(ball, { x: x + velocityBump, y });
+    }
+    if (event.key === upKey) {
+        Body.setVelocity(ball, { x, y: y - velocityBump });
+    }
+    if (event.key === leftKey) {
+        Body.setVelocity(ball, { x: x - velocityBump, y });
+    }
+    if (event.key === downKey) {
+        Body.setVelocity(ball, { x, y: y + velocityBump });
+    }
+});
