@@ -1,4 +1,4 @@
-const cells = 24;
+const cells = 3;
 const width = 600;
 const height = 600;
 const wallThickness = 5;
@@ -165,15 +165,33 @@ verticals.forEach((row, rowIndex) => {
     });
 });
 
+//Goal
 const goal = Bodies.rectangle(
     //x coordinate of center of lower right square in the grid
     width - unitLength / 2,
+    //y coordinate of center of lower right square in the grid
     height - unitLength / 2,
-    unitLength * 0.7,
-    unitLength * 0.7,
+    //make the goal half the size of a cell
+    unitLength / 2,
+    unitLength / 2,
     {
         isStatic: true,
         render: { fillStyle: 'green' }
     }
 );
 World.add(world, goal);
+
+//Ball that user moves
+const ball = Bodies.circle(
+    //starting x coordinate - center  of upper left cell
+    unitLength / 2,
+    //starting y coordinate - center  of upper left cell
+    unitLength / 2,
+    //make the ball half the size of a cell - radius half that 
+    unitLength / 4,
+    {
+        isStatic: true,
+        render: { fillStyle: 'red' }
+    }
+);
+World.add(world, ball);
