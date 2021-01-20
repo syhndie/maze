@@ -1,4 +1,4 @@
-const cells = 16;
+const cells = 3;
 const width = 700;
 const height = 700;
 const wallThickness = 5;
@@ -17,7 +17,9 @@ const {
     Runner,
     World,
     Bodies,
-    Body } = Matter;
+    Body,
+    Events } = Matter;
+
 //create instances of Engine, World, and Render
 const engine = Engine.create();
 engine.world.gravity.y = 0;
@@ -31,6 +33,7 @@ const render = Render.create({
         wireframes: false,
     }
 });
+
 //render the world
 Render.run(render);
 Runner.run(Runner.create(), engine);
@@ -183,6 +186,7 @@ const goal = Bodies.rectangle(
     unitLength / 2,
     {
         isStatic: true,
+        label: 'goal',
         render: { fillStyle: 'green' }
     }
 );
@@ -197,7 +201,7 @@ const ball = Bodies.circle(
     //make the ball half the size of a cell - radius half that 
     unitLength / 4,
     {
-
+        label: 'ball',
         render: { fillStyle: 'red' }
     }
 );
@@ -217,4 +221,17 @@ document.addEventListener('keydown', event => {
     if (event.key === downKey) {
         Body.setVelocity(ball, { x, y: y + velocityBump });
     }
+});
+
+//Win Condition
+Events.on(engine, 'collisionStart', event => {
+    event.pairs.forEach((collision) => {
+        const labels = ['ball', 'goal'];
+        if (
+            labels.includes(collision.bodyA.label) &&
+            labels.includes(collision.bodyB.label)
+        ) {
+            console.log('ball hit goal');
+        }
+    });
 });
