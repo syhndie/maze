@@ -1,4 +1,4 @@
-const cells = 3;
+const cells = 10;
 const width = 700;
 const height = 700;
 const wallThickness = 5;
@@ -147,6 +147,7 @@ horizontals.forEach((row, rowIndex) => {
             unitLength,
             wallThickness,
             {
+                label: 'innerWall',
                 isStatic: true
             }
         );
@@ -168,6 +169,7 @@ verticals.forEach((row, rowIndex) => {
             //the heigth of the vertical wall
             unitLength,
             {
+                label: 'innerWall',
                 isStatic: true
             }
         );
@@ -231,7 +233,12 @@ Events.on(engine, 'collisionStart', event => {
             labels.includes(collision.bodyA.label) &&
             labels.includes(collision.bodyB.label)
         ) {
-            console.log('ball hit goal');
+            world.gravity.y = 1;
+            world.bodies.forEach((body) => {
+                if (body.label === 'innerWall') {
+                    Body.setStatic(body, false);
+                }
+            });
         }
     });
 });
