@@ -1,7 +1,7 @@
-const cellsHorizontal = 4;
-const cellsVertical = 20;
-const width = window.innerWidth;
-const height = window.innerHeight;
+const cellsHorizontal = 12;
+const cellsVertical = 12;
+const width = window.innerWidth * 0.96;
+const height = window.innerHeight * 0.96;
 const wallThickness = 5;
 //length of one side of one cell
 const unitLengthX = width / cellsHorizontal;
@@ -10,7 +10,13 @@ const upKey = 'ArrowUp';
 const downKey = 'ArrowDown';
 const leftKey = 'ArrowLeft';
 const rightKey = 'ArrowRight';
-const velocityBump = 2;
+const velocityBump = 4;
+const airFriction = 0.1;
+const ballDensity = 0.2;
+const velocityCap = 11;
+const wallDensity = 0.00001;
+const endingGravity = 0.1;
+const goalDensity = 0.00001;
 
 //destructure necessary parameters from Matter.js
 const {
@@ -42,10 +48,34 @@ Runner.run(Runner.create(), engine);
 
 //create outside boundary walls
 const walls = [
-    Bodies.rectangle(width / 2, 0, width, wallThickness, { isStatic: true }),
-    Bodies.rectangle(width / 2, height, width, wallThickness, { isStatic: true }),
-    Bodies.rectangle(0, height / 2, wallThickness, height, { isStatic: true }),
-    Bodies.rectangle(width, height / 2, wallThickness, height, { isStatic: true })
+    Bodies.rectangle(
+        width / 2,
+        0,
+        width,
+        wallThickness,
+        { isStatic: true }
+    ),
+    Bodies.rectangle(
+        width / 2,
+        height,
+        width,
+        wallThickness,
+        { isStatic: true }
+    ),
+    Bodies.rectangle(
+        0,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true }
+    ),
+    Bodies.rectangle(
+        width,
+        height / 2,
+        wallThickness,
+        height,
+        { isStatic: true }
+    )
 ];
 World.add(world, walls);
 
@@ -154,6 +184,7 @@ horizontals.forEach((row, rowIndex) => {
             unitLengthX,
             wallThickness,
             {
+                density: wallDensity,
                 label: 'innerWall',
                 isStatic: true
             }
@@ -176,6 +207,7 @@ verticals.forEach((row, rowIndex) => {
             //the heigth of the vertical wall
             unitLengthY,
             {
+                density: wallDensity,
                 label: 'innerWall',
                 isStatic: true
             }
@@ -195,6 +227,7 @@ const goal = Bodies.rectangle(
     goalWidth,
     goalWidth,
     {
+        density: goalDensity,
         isStatic: true,
         label: 'goal',
         render: { fillStyle: 'green' }
@@ -213,6 +246,8 @@ const ball = Bodies.circle(
     radius,
     {
         label: 'ball',
+        density: ballDensity,
+        frictionAir: airFriction,
         render: { fillStyle: 'red' }
     }
 );
@@ -220,16 +255,16 @@ World.add(world, ball);
 
 document.addEventListener('keydown', event => {
     const { x, y } = ball.velocity;
-    if (event.key === rightKey) {
+    if (event.key === rightKey && x < velocityCap) {
         Body.setVelocity(ball, { x: x + velocityBump, y });
     }
-    if (event.key === upKey) {
+    if (event.key === upKey && y > -velocityCap) {
         Body.setVelocity(ball, { x, y: y - velocityBump });
     }
-    if (event.key === leftKey) {
+    if (event.key === leftKey && x > -velocityCap) {
         Body.setVelocity(ball, { x: x - velocityBump, y });
     }
-    if (event.key === downKey) {
+    if (event.key === downKey && y < velocityCap) {
         Body.setVelocity(ball, { x, y: y + velocityBump });
     }
 });
@@ -242,9 +277,12 @@ Events.on(engine, 'collisionStart', event => {
             labels.includes(collision.bodyA.label) &&
             labels.includes(collision.bodyB.label)
         ) {
-            world.gravity.y = 1;
+            world.gravity.y = endingGravity;
             world.bodies.forEach((body) => {
-                if (body.label === 'innerWall') {
+                if (
+                    body.label === 'innerWall' ||
+                    body.label === 'goal'
+                ) {
                     Body.setStatic(body, false);
                 }
             });
