@@ -1,9 +1,11 @@
-const cells = 10;
-const width = 700;
-const height = 700;
+const cellsHorizontal = 4;
+const cellsVertical = 20;
+const width = window.innerWidth;
+const height = window.innerHeight;
 const wallThickness = 5;
 //length of one side of one cell
-const unitLength = width / cells;
+const unitLengthX = width / cellsHorizontal;
+const unitLengthY = height / cellsVertical;
 const upKey = 'ArrowUp';
 const downKey = 'ArrowDown';
 const leftKey = 'ArrowLeft';
@@ -65,26 +67,26 @@ const shuffle = (arr) => {
     return arr;
 };
 //array that reprsents the cells of the maze
-const grid = Array(cells)
+const grid = Array(cellsVertical)
     .fill(null)
-    .map(() => Array(cells).fill(false));
+    .map(() => Array(cellsHorizontal).fill(false));
 //array of vertical walls
 //each array in verticals is a row of  vertical walls
 //each element in that array is an actual wall
 //true means 'is open'
-const verticals = Array(cells)
+const verticals = Array(cellsVertical)
     .fill(null)
-    .map(() => Array(cells - 1).fill(false));
+    .map(() => Array(cellsHorizontal - 1).fill(false));
 //array of horizontal walls
 //each array in horizontals is a row of horizontal walls
 //each element in the array is an actual wall
 //true means 'is open'
-const horizontals = Array(cells - 1)
+const horizontals = Array(cellsVertical - 1)
     .fill(null)
-    .map(() => Array(cells).fill(false));
+    .map(() => Array(cellsHorizontal).fill(false));
 
-const startRow = Math.floor(Math.random() * cells);
-const startColumn = Math.floor(Math.random() * cells);
+const startRow = Math.floor(Math.random() * cellsVertical);
+const startColumn = Math.floor(Math.random() * cellsHorizontal);
 
 const stepThroughCell = (row, column) => {
     //if i have visited the cell, then return
@@ -108,7 +110,12 @@ const stepThroughCell = (row, column) => {
     for (let neighbor of neighbors) {
         const [nextRow, nextColumn, direction] = neighbor;
         //check if neighbor is out of bounds
-        if (nextRow < 0 || nextRow >= cells || nextColumn < 0 || nextColumn >= cells) {
+        if (
+            nextRow < 0 ||
+            nextRow >= cellsVertical ||
+            nextColumn < 0 ||
+            nextColumn >= cellsHorizontal
+        ) {
             continue;
         }
         //check if i have visited that neighbor
@@ -140,11 +147,11 @@ horizontals.forEach((row, rowIndex) => {
         }
         const wall = Bodies.rectangle(
             //find the x coordinate of the center of the horizonal wall
-            columnIndex * unitLength + unitLength / 2,
+            columnIndex * unitLengthX + unitLengthX / 2,
             //find the y coordinate of the center of the horizontal wall
-            rowIndex * unitLength + unitLength,
+            rowIndex * unitLengthY + unitLengthY,
             //the width of the horizontal wall
-            unitLength,
+            unitLengthX,
             wallThickness,
             {
                 label: 'innerWall',
@@ -162,12 +169,12 @@ verticals.forEach((row, rowIndex) => {
         }
         const wall = Bodies.rectangle(
             //find the x coordinate of the center of the vertical wall
-            columnIndex * unitLength + unitLength,
+            columnIndex * unitLengthX + unitLengthX,
             //find the y coordinate of the center of the vertical wall
-            rowIndex * unitLength + unitLength / 2,
+            rowIndex * unitLengthY + unitLengthY / 2,
             wallThickness,
             //the heigth of the vertical wall
-            unitLength,
+            unitLengthY,
             {
                 label: 'innerWall',
                 isStatic: true
@@ -178,14 +185,15 @@ verticals.forEach((row, rowIndex) => {
 });
 
 //Goal
+const goalWidth = Math.min(unitLengthX, unitLengthY) / 2;
 const goal = Bodies.rectangle(
     //x coordinate of center of lower right square in the grid
-    width - unitLength / 2,
+    width - unitLengthX / 2,
     //y coordinate of center of lower right square in the grid
-    height - unitLength / 2,
+    height - unitLengthY / 2,
     //make the goal half the size of a cell
-    unitLength / 2,
-    unitLength / 2,
+    goalWidth,
+    goalWidth,
     {
         isStatic: true,
         label: 'goal',
@@ -195,13 +203,14 @@ const goal = Bodies.rectangle(
 World.add(world, goal);
 
 //Ball that user moves
+const radius = Math.min(unitLengthX, unitLengthY) / 4;
 const ball = Bodies.circle(
     //starting x coordinate - center  of upper left cell
-    unitLength / 2,
+    unitLengthX / 2,
     //starting y coordinate - center  of upper left cell
-    unitLength / 2,
+    unitLengthY / 2,
     //make the ball half the size of a cell - radius half that 
-    unitLength / 4,
+    radius,
     {
         label: 'ball',
         render: { fillStyle: 'red' }
