@@ -1,5 +1,5 @@
-const cellsHorizontal = 12;
-const cellsVertical = 12;
+const cellsHorizontal = 4;
+const cellsVertical = 4;
 const width = window.innerWidth * 0.96;
 const height = window.innerHeight * 0.96;
 const wallThickness = 5;
@@ -277,6 +277,10 @@ Events.on(engine, 'collisionStart', event => {
             labels.includes(collision.bodyA.label) &&
             labels.includes(collision.bodyB.label)
         ) {
+            document.querySelector('.first-winner').classList.remove('hidden');
+            setTimeout(() => {
+                document.querySelector('.second-winner').classList.remove('hidden');
+            }, 2000)
             world.gravity.y = endingGravity;
             world.bodies.forEach((body) => {
                 if (
