@@ -280,7 +280,10 @@ Events.on(engine, 'collisionStart', event => {
             document.querySelector('.first-winner').classList.remove('hidden');
             setTimeout(() => {
                 document.querySelector('.second-winner').classList.remove('hidden');
-            }, 2000)
+            }, 2000);
+            setTimeout(() => {
+                document.querySelector('.replay').classList.remove('hidden');
+            }, 3000);
             world.gravity.y = endingGravity;
             world.bodies.forEach((body) => {
                 if (

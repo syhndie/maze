@@ -9,26 +9,30 @@
         h1 {
             color: white;
             font-size: 36px;
-            ;
+        }
+
+        .first-winner, .second-winner, .replay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            z-index: 1;
+            height: 20vh;
+            width: 100vw;
         }
 
         .first-winner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            z-index: 1;
-            height: 90vh;
-            width: 100vw;
+            top: 20vh;
         }
 
         .second-winner {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: fixed;
-            bottom: 0;
-            z-index: 1;
-            height: 90vh;
-            width: 100vw;
+            top: 40vh;
+        }
+
+        .replay {
+            top: 60vh;
+        }
+
+        #replay-button {
+            width: 50px;
         }
