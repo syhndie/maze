@@ -3,9 +3,6 @@ const cellsVertical = 4;
 const width = window.innerWidth * 0.96;
 const height = window.innerHeight * 0.96;
 const wallThickness = 5;
-//length of one side of one cell
-const unitLengthX = width / cellsHorizontal;
-const unitLengthY = height / cellsVertical;
 const upKey = 'ArrowUp';
 const downKey = 'ArrowDown';
 const leftKey = 'ArrowLeft';
@@ -17,6 +14,8 @@ const velocityCap = 11;
 const wallDensity = 0.00001;
 const endingGravity = 0.1;
 const goalDensity = 0.00001;
+const unitLengthX = width / cellsHorizontal;
+const unitLengthY = height / cellsVertical;
 
 //destructure necessary parameters from Matter.js
 const {
@@ -30,7 +29,6 @@ const {
 
 //create instances of Engine, World, and Render
 const engine = Engine.create();
-engine.world.gravity.y = 0;
 const { world } = engine;
 const render = Render.create({
     element: document.body,
@@ -41,6 +39,9 @@ const render = Render.create({
         wireframes: false,
     }
 });
+
+//set starting gravity
+world.gravity.y = 0;
 
 //render the world
 Render.run(render);
@@ -53,28 +54,40 @@ const walls = [
         0,
         width,
         wallThickness,
-        { isStatic: true }
+        {
+            isStatic: true,
+            label: 'outerWall'
+        }
     ),
     Bodies.rectangle(
         width / 2,
         height,
         width,
         wallThickness,
-        { isStatic: true }
+        {
+            isStatic: true,
+            label: 'outerWall'
+        }
     ),
     Bodies.rectangle(
         0,
         height / 2,
         wallThickness,
         height,
-        { isStatic: true }
+        {
+            isStatic: true,
+            label: 'outerWall'
+        }
     ),
     Bodies.rectangle(
         width,
         height / 2,
         wallThickness,
         height,
-        { isStatic: true }
+        {
+            isStatic: true,
+            label: 'outerWall'
+        }
     )
 ];
 World.add(world, walls);
@@ -96,10 +109,12 @@ const shuffle = (arr) => {
     }
     return arr;
 };
+
 //array that reprsents the cells of the maze
 const grid = Array(cellsVertical)
     .fill(null)
     .map(() => Array(cellsHorizontal).fill(false));
+
 //array of vertical walls
 //each array in verticals is a row of  vertical walls
 //each element in that array is an actual wall
@@ -107,6 +122,7 @@ const grid = Array(cellsVertical)
 const verticals = Array(cellsVertical)
     .fill(null)
     .map(() => Array(cellsHorizontal - 1).fill(false));
+
 //array of horizontal walls
 //each array in horizontals is a row of horizontal walls
 //each element in the array is an actual wall
@@ -115,10 +131,9 @@ const horizontals = Array(cellsVertical - 1)
     .fill(null)
     .map(() => Array(cellsHorizontal).fill(false));
 
-const startRow = Math.floor(Math.random() * cellsVertical);
-const startColumn = Math.floor(Math.random() * cellsHorizontal);
-
+//function to determine path out of a given cell
 const stepThroughCell = (row, column) => {
+
     //if i have visited the cell, then return
     if (grid[row][column]) {
         return;
@@ -148,10 +163,12 @@ const stepThroughCell = (row, column) => {
         ) {
             continue;
         }
+
         //check if i have visited that neighbor
         if (grid[nextRow][nextColumn]) {
             continue;
         }
+
         //remove wall that is being croseed (change to true (is open) in horizontal or vertical array)
         if (direction === 'left') {
             verticals[row][column - 1] = true;
@@ -162,11 +179,20 @@ const stepThroughCell = (row, column) => {
         } else if (direction === 'down') {
             horizontals[row][column] = true;
         }
+
         //visit the cell (run this function with the new cell's row/column)
         stepThroughCell(nextRow, nextColumn);
     }
 };
+
+//randomly choose a cell to start
+const startRow = Math.floor(Math.random() * cellsVertical);
+const startColumn = Math.floor(Math.random() * cellsHorizontal);
+
 stepThroughCell(startRow, startColumn);
+
+//array of elements populating our world (not the outer walls)
+const innerElements = [];
 
 //create inner maze walls
 horizontals.forEach((row, rowIndex) => {
@@ -190,6 +216,7 @@ horizontals.forEach((row, rowIndex) => {
             }
         );
         World.add(world, wall);
+        innerElements.push(wall);
     });
 });
 verticals.forEach((row, rowIndex) => {
@@ -213,6 +240,7 @@ verticals.forEach((row, rowIndex) => {
             }
         );
         World.add(world, wall);
+        innerElements.push(wall);
     });
 });
 
@@ -234,6 +262,7 @@ const goal = Bodies.rectangle(
     }
 );
 World.add(world, goal);
+innerElements.push(goal);
 
 //Ball that user moves
 const radius = Math.min(unitLengthX, unitLengthY) / 4;
@@ -252,6 +281,7 @@ const ball = Bodies.circle(
     }
 );
 World.add(world, ball);
+innerElements.push(ball);
 
 document.addEventListener('keydown', event => {
     const { x, y } = ball.velocity;
@@ -296,3 +326,13 @@ Events.on(engine, 'collisionStart', event => {
         }
     });
 });
+
+//Restart the game
+const button = document.querySelector('#replay-button');
+button.addEventListener('click', () => {
+    world.gravity.y = 0;
+    World.remove(world, innerElements);
+    innerElements.splice(0, innerElements.length);
+    //next wrap the code that populates the maze in a function, and then here, call that function to repopulate the maze
+});
+
